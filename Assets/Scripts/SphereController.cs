@@ -13,9 +13,14 @@ public class SphereController : MonoBehaviour {
 
 	public PanoData[] panoplaces;
 
+	private int activePanoSet;
+	private int activeViewMode;
+
 	// Use this for initialization
 	void Start () {
 		SetTextures(panoplaces[0], 1);
+		activePanoSet = 0;
+		activeViewMode = 1;
 	}
 	
 	// Update is called once per frame
@@ -25,11 +30,18 @@ public class SphereController : MonoBehaviour {
 
 	//UI Button Input Methods
 	public void BtnPhotoDown(){
-		SetTextures(panoplaces[0], 1);
+		SetTextures(panoplaces[activePanoSet], 1);
+		activeViewMode = 1;
 	}
 
 	public void BtnTLMDown(){
-		SetTextures(panoplaces[0], 2);
+		SetTextures(panoplaces[activePanoSet], 2);
+		activeViewMode = 2;
+	}
+
+	public void BtnSceneDown(int panoChosen){
+		SetTextures(panoplaces[panoChosen], activeViewMode);
+		activePanoSet = panoChosen;
 	}
 
 
