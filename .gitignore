@@ -1,0 +1,13 @@
+
+Library
+Temp
+Build
+Administration
+Export
+
+.DS_Store
+*.csproj
+*.pidb
+*.unityproj
+*.sln
+*.userprefs
