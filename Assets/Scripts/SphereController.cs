@@ -18,8 +18,8 @@ public class SphereController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		SetTextures(panoplaces[0], 1);
-		activePanoSet = 0;
+		SetTextures(panoplaces[MenuController.sceneToLoad], 1);
+		activePanoSet = MenuController.sceneToLoad;
 		activeViewMode = 1;
 	}
 	
