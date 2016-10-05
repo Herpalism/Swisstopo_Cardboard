@@ -3,6 +3,8 @@
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _Color ("Main Color", Color) = (1.000000,1.000000,1.000000,1.000000)
+
 
 		[KeywordEnum(None, Top_Bottom, Left_Right)] Stereo ("Stereo Mode", Float) = 0
 		[Toggle(STEREO_DEBUG)] _StereoDebug ("Stereo Debug Tinting", Float) = 0
@@ -59,6 +61,7 @@
             uniform sampler2D _MainTex;
 			uniform float4 _MainTex_ST;
 			uniform float3 _cameraPosition;
+			float4 _Color;
 
 			bool DetermineEye()
 			{
@@ -198,7 +201,10 @@
 #if STEREO_DEBUG
 				col *= i.tint;
 #endif
-                return fixed4(col.rgb, 1.0);
+
+				fixed4 outColor=(1-_Color.a)*col+(_Color.a*_Color);
+                //return fixed4(col.rgb, 1.0);
+                return outColor;
             }
             ENDCG
         }

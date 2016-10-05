@@ -9,6 +9,9 @@ public class UIController : MonoBehaviour {
 	public Canvas canvasInApp;
 	public Canvas canvasSceneMenu;
 	public GameObject blackSphere;
+	public GameObject SphereSolo;
+	public GameObject SphereTLM_L;
+	public GameObject SphereTLM_R;
 
 	//Variables for turning
 	public GameObject gVRMain;
@@ -19,18 +22,24 @@ public class UIController : MonoBehaviour {
 	private bool goHome = false;
 	private float blackAlpha = 1f;
 
+	//Internal Controller for Black Sphere
+	private float blackAlphaRef;
+	private float blackAlphaActual = 1f;
+
 	// Use this for initialization
 	void Start () {
 		SwitchMenu(false);
 		sceneMenuActive = false;
 		goHome = false;
-		blackAlpha = 1f;
-		blackSphere.GetComponent<Renderer>().material.color = new Color(0f,0f,0f,1f);
+		blackAlphaActual = 1f;
 	}
 
 	public void MenuBtnDown(){
 		SwitchMenu(true);
-		sceneMenuActive = true;
+	}
+
+	public void CloseBtnDown(){
+		SwitchMenu(false);
 	}
 
 	public void HomeBtnDown(){
@@ -40,6 +49,15 @@ public class UIController : MonoBehaviour {
 	void SwitchMenu(bool showSceneMenu){
 		canvasInApp.gameObject.SetActive(!showSceneMenu);
 		canvasSceneMenu.gameObject.SetActive(showSceneMenu);
+		sceneMenuActive = showSceneMenu;
+
+		//Control Darkness
+		if(showSceneMenu){
+			blackAlpha = 0.5f;
+		}
+		else{
+			blackAlpha = 0f;
+		}
 	}
 	
 	// Update is called once per frame
@@ -52,6 +70,7 @@ public class UIController : MonoBehaviour {
 				transform.rotation = Quaternion.Euler(actualRot);
 			}
 		}
+		/*
 		else{
 			if(EventSystem.current.IsPointerOverGameObject()){
 				hasEnteredSceneMenu = true;
@@ -64,7 +83,9 @@ public class UIController : MonoBehaviour {
 				}
 			}
 		}
+		*/
 
+		/*
 		//Go to Home Menu
 		blackAlpha = Mathf.Clamp01(blackAlpha);
 		if(goHome){
@@ -78,5 +99,12 @@ public class UIController : MonoBehaviour {
 			blackAlpha -= 0.5f*Time.deltaTime;
 			blackSphere.GetComponent<Renderer>().material.color = new Color(0f,0f,0f,blackAlpha);
 		}
+		*/
+
+		//Set Darkness Level based on blackAlpha Value
+		blackAlphaActual = Mathf.SmoothDamp(blackAlphaActual, blackAlpha, ref blackAlphaRef, 0.5f);
+		SphereSolo.GetComponent<Renderer>().material.color = new Color(0f,0f,0f,blackAlphaActual);
+		SphereTLM_L.GetComponent<Renderer>().material.color = new Color(0f,0f,0f,blackAlphaActual);
+		SphereTLM_R.GetComponent<Renderer>().material.color = new Color(0f,0f,0f,blackAlphaActual);
 	}
 }

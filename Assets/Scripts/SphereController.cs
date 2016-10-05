@@ -7,9 +7,11 @@ public class SphereController : MonoBehaviour {
 	public GameObject sphereStereoL;
 	public GameObject sphereStereoR;
 
-	public Material sphereMonoMat;
-	public Material sphereStereoLMat;
-	public Material sphereStereoRMat;
+
+	public GameObject sphereMonoMat;
+	public GameObject sphereStereoLMat;
+	public GameObject sphereStereoRMat;
+
 
 	public PanoData[] panoplaces;
 
@@ -47,21 +49,25 @@ public class SphereController : MonoBehaviour {
 
 	//Main Function for changing mode and according textures
 	public void SetTextures(PanoData panoActive, int mode){
+		//print("Setting Textures: "+ panoActive.name);
 		//Mode 1 = Mono, Mode 2 = Stereo TLM, Mode 3 = Stereo TLM Realistisch
 		if(mode == 1){
-			sphereMonoMat.mainTexture = panoActive.texPhoto;
+			sphereMonoMat.GetComponent<Renderer>().material.mainTexture = panoActive.texPhoto;
 			SetStereo(false);
 		}
 		if(mode == 2){
-			sphereStereoLMat.mainTexture = panoActive.texTLM_Left;
-			sphereStereoRMat.mainTexture = panoActive.texTLM_Right;
+			sphereStereoLMat.GetComponent<Renderer>().material.mainTexture = panoActive.texTLM_Left;
+			sphereStereoRMat.GetComponent<Renderer>().material.mainTexture = panoActive.texTLM_Right;
 			SetStereo(true);
 		}
 		if(mode == 3){
-			sphereStereoLMat.mainTexture = panoActive.texTLMReal_Left;
-			sphereStereoRMat.mainTexture = panoActive.texTLMReal_Right;
+			sphereStereoLMat.GetComponent<Renderer>().material.mainTexture = panoActive.texTLMReal_Left;
+			sphereStereoRMat.GetComponent<Renderer>().material.mainTexture = panoActive.texTLMReal_Right;
 			SetStereo(true);
 		}
+
+		//Set Rotation for Photo Mono Sphere
+		sphereMonoMat.transform.localRotation = Quaternion.Euler(panoActive.rotCorrectionPhoto);
 	}
 
 	void SetStereo(bool isStereo){
@@ -80,4 +86,5 @@ public class PanoData{
 	public Texture2D texTLM_Right;
 	public Texture2D texTLMReal_Left;
 	public Texture2D texTLMReal_Right;
+	public Vector3 rotCorrectionPhoto;
 }
