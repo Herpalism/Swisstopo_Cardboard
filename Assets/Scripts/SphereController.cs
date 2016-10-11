@@ -20,7 +20,7 @@ public class SphereController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		SetTextures(panoplaces[MenuController.sceneToLoad], 1);
+		SetTexturesLoadAsync(panoplaces[MenuController.sceneToLoad], 1);
 		activePanoSet = MenuController.sceneToLoad;
 		activeViewMode = 1;
 	}
@@ -32,17 +32,17 @@ public class SphereController : MonoBehaviour {
 
 	//UI Button Input Methods
 	public void BtnPhotoDown(){
-		SetTextures(panoplaces[activePanoSet], 1);
+		SetTexturesLoadAsync(panoplaces[activePanoSet], 1);
 		activeViewMode = 1;
 	}
 
 	public void BtnTLMDown(){
-		SetTextures(panoplaces[activePanoSet], 2);
+		SetTexturesLoadAsync(panoplaces[activePanoSet], 2);
 		activeViewMode = 2;
 	}
 
 	public void BtnSceneDown(int panoChosen){
-		SetTextures(panoplaces[panoChosen], activeViewMode);
+		SetTexturesLoadAsync(panoplaces[panoChosen], activeViewMode);
 		activePanoSet = panoChosen;
 	}
 
@@ -70,12 +70,86 @@ public class SphereController : MonoBehaviour {
 		sphereMonoMat.transform.localRotation = Quaternion.Euler(panoActive.rotCorrectionPhoto);
 	}
 
+
+	Texture2D textureLeft;
+	Texture2D textureRight;
+	//Main Function for changing mode and according textures
+	public void SetTexturesLoad(PanoData panoActive, int mode){
+		//print("Setting Textures: "+ panoActive.name);
+		//Mode 1 = Mono, Mode 2 = Stereo TLM, Mode 3 = Stereo TLM Realistisch
+		if(mode == 1){
+			sphereMonoMat.GetComponent<Renderer>().material.mainTexture = panoActive.texPhoto;
+			SetStereo(false);
+		}
+		if(mode == 2){
+			Resources.UnloadAsset(textureLeft);
+			Resources.UnloadAsset(textureRight);
+			textureLeft=Resources.Load(panoActive.texTLM_Left.name) as Texture2D;
+			textureRight=Resources.Load(panoActive.texTLM_Right.name) as Texture2D;
+			sphereStereoLMat.GetComponent<Renderer>().material.mainTexture = textureLeft;
+			sphereStereoRMat.GetComponent<Renderer>().material.mainTexture = textureRight;
+			SetStereo(true);
+		}
+		if(mode == 3){
+			sphereStereoLMat.GetComponent<Renderer>().material.mainTexture = panoActive.texTLMReal_Left;
+			sphereStereoRMat.GetComponent<Renderer>().material.mainTexture = panoActive.texTLMReal_Right;
+			SetStereo(true);
+		}
+
+		//Set Rotation for Photo Mono Sphere
+		sphereMonoMat.transform.localRotation = Quaternion.Euler(panoActive.rotCorrectionPhoto);
+	}
+
+	public void SetTexturesLoadAsync(PanoData panoActive, int mode){
+		print("loadstart");
+		//print("Setting Textures: "+ panoActive.name);
+		//Mode 1 = Mono, Mode 2 = Stereo TLM, Mode 3 = Stereo TLM Realistisch
+		if(mode == 1){
+			sphereMonoMat.GetComponent<Renderer>().material.mainTexture = panoActive.texPhoto;
+			SetStereo(false);
+		}
+		if(mode == 2){
+			Resources.UnloadAsset(textureLeft);
+			Resources.UnloadAsset(textureRight);
+			StartCoroutine(LoadFinished(
+			Resources.LoadAsync(panoActive.texTLM_Left.name),
+				Resources.LoadAsync(panoActive.texTLM_Right.name)));
+			sphereStereoLMat.GetComponent<Renderer>().material.mainTexture = panoActive.texTLM_Left;
+			sphereStereoRMat.GetComponent<Renderer>().material.mainTexture = panoActive.texTLM_Right;
+			SetStereo(true);
+		}
+		if(mode == 3){
+			sphereStereoLMat.GetComponent<Renderer>().material.mainTexture = panoActive.texTLMReal_Left;
+			sphereStereoRMat.GetComponent<Renderer>().material.mainTexture = panoActive.texTLMReal_Right;
+			SetStereo(true);
+		}
+
+		//Set Rotation for Photo Mono Sphere
+		sphereMonoMat.transform.localRotation = Quaternion.Euler(panoActive.rotCorrectionPhoto);
+	}
+
+	IEnumerator LoadFinished(ResourceRequest left, ResourceRequest right){
+		while (!left.isDone && !right.isDone) {
+			print(left.isDone.ToString() + right.isDone.ToString());
+			yield return new WaitForEndOfFrame();
+		}
+		textureLeft=left.asset as Texture2D;
+		textureRight=right.asset as Texture2D;
+		sphereStereoLMat.GetComponent<Renderer>().material.mainTexture=textureLeft;
+		sphereStereoRMat.GetComponent<Renderer>().material.mainTexture = textureRight;
+		SetStereo(true);
+		print("sucessfully loaded");
+		}
+
 	void SetStereo(bool isStereo){
 		sphereMono.SetActive(!isStereo);
 		sphereStereoL.SetActive(isStereo);
 		sphereStereoR.SetActive(isStereo);
 	}
 }
+
+
+
 
 
 [System.Serializable]  

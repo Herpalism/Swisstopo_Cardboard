@@ -6,7 +6,7 @@ public class VRSetter : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		//VRSettings.renderScale = 1.5f;
+		VRSettings.renderScale = 1.5f;
 	}
 	
 	// Update is called once per frame
