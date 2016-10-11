@@ -28,8 +28,8 @@ public class UIController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		SwitchMenu(false);
-		sceneMenuActive = false;
+		SwitchMenu(true);
+		sceneMenuActive = true;
 		goHome = false;
 		blackAlphaActual = 1f;
 	}
@@ -63,7 +63,8 @@ public class UIController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if(!sceneMenuActive){
-			if(!EventSystem.current.IsPointerOverGameObject()){
+			//if(!EventSystem.current.IsPointerOverGameObject()){
+			if(!(gVRMain.transform.rotation.eulerAngles.x > 10f && gVRMain.transform.rotation.eulerAngles.x < 50f)){
 				//transform.rotation = Quaternion.Euler(new Vector3(0f,gVRMain.transform.rotation.eulerAngles.y, 0f));
 				Vector3 desiredRot = new Vector3(0f,gVRMain.transform.rotation.eulerAngles.y, 0f);
 				Vector3 actualRot = Vector3.SmoothDamp(transform.rotation.eulerAngles, desiredRot, ref refVec, 0.5f);
