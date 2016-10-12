@@ -8,6 +8,7 @@ public class UIController : MonoBehaviour {
 
 	public Canvas canvasInApp;
 	public Canvas canvasSceneMenu;
+	public Canvas canvasTutorial;
 	public GameObject blackSphere;
 	public GameObject SphereSolo;
 	public GameObject SphereTLM_L;
@@ -16,6 +17,7 @@ public class UIController : MonoBehaviour {
 	//Variables for turning
 	public GameObject gVRMain;
 	private Vector3 refVec;
+	private float refFloat;
 
 	private bool sceneMenuActive = false;
 	private bool hasEnteredSceneMenu = false;
@@ -28,10 +30,12 @@ public class UIController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		SwitchMenu(true);
-		sceneMenuActive = true;
+		canvasInApp.gameObject.SetActive(false);
+		canvasSceneMenu.gameObject.SetActive(false);
+		canvasTutorial.gameObject.SetActive(true);
 		goHome = false;
 		blackAlphaActual = 1f;
+		blackAlpha = 0.5f;
 	}
 
 	public void MenuBtnDown(){
@@ -44,6 +48,12 @@ public class UIController : MonoBehaviour {
 
 	public void HomeBtnDown(){
 		goHome = true;
+	}
+
+	public void CloseTutorial(){
+		Destroy(canvasTutorial.gameObject);
+		SwitchMenu(true);
+		sceneMenuActive = true;
 	}
 
 	void SwitchMenu(bool showSceneMenu){
@@ -64,11 +74,21 @@ public class UIController : MonoBehaviour {
 	void Update () {
 		if(!sceneMenuActive){
 			//if(!EventSystem.current.IsPointerOverGameObject()){
-			if(!(gVRMain.transform.rotation.eulerAngles.x > 10f && gVRMain.transform.rotation.eulerAngles.x < 50f)){
+			if(!(gVRMain.transform.rotation.eulerAngles.x > 20f && gVRMain.transform.rotation.eulerAngles.x < 50f)){
 				//transform.rotation = Quaternion.Euler(new Vector3(0f,gVRMain.transform.rotation.eulerAngles.y, 0f));
-				Vector3 desiredRot = new Vector3(0f,gVRMain.transform.rotation.eulerAngles.y, 0f);
-				Vector3 actualRot = Vector3.SmoothDamp(transform.rotation.eulerAngles, desiredRot, ref refVec, 0.5f);
-				transform.rotation = Quaternion.Euler(actualRot);
+				float desiredY = gVRMain.transform.rotation.eulerAngles.y;
+				float currentY = transform.rotation.eulerAngles.y;
+				if(currentY-desiredY >180){
+					desiredY=desiredY+360;
+				} else if(currentY-desiredY < -180){
+					currentY = currentY+360;
+				} 
+				float actualY= Mathf.SmoothDamp(currentY,desiredY,ref refFloat,0.5f);
+
+				// Vector3 desiredRot = new Vector3(0f,gVRMain.transform.rotation.eulerAngles.y, 0f);
+				// Vector3 actualRot = Vector3.SmoothDamp(transform.rotation.eulerAngles, desiredRot, ref refVec, 0.5f);
+				// transform.rotation = Quaternion.Euler(actualRot);
+				transform.rotation=Quaternion.Euler(0,actualY,0);
 			}
 		}
 		/*

@@ -20,9 +20,10 @@ public class SphereController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		SetTexturesLoadAsync(panoplaces[MenuController.sceneToLoad], 1);
-		activePanoSet = MenuController.sceneToLoad;
+		SetTextures(panoplaces[6], 1);
+		activePanoSet = 6;
 		activeViewMode = 1;
+		Application.backgroundLoadingPriority = ThreadPriority.Low;
 	}
 	
 	// Update is called once per frame
@@ -32,24 +33,25 @@ public class SphereController : MonoBehaviour {
 
 	//UI Button Input Methods
 	public void BtnPhotoDown(){
-		SetTexturesLoadAsync(panoplaces[activePanoSet], 1);
+		SetTextures(panoplaces[activePanoSet], 1);
 		activeViewMode = 1;
 	}
 
 	public void BtnTLMDown(){
-		SetTexturesLoadAsync(panoplaces[activePanoSet], 2);
+		SetTextures(panoplaces[activePanoSet], 2);
 		activeViewMode = 2;
 	}
 
 	public void BtnSceneDown(int panoChosen){
-		SetTexturesLoadAsync(panoplaces[panoChosen], activeViewMode);
+		print("Btn Down Received. Int: "+panoChosen);
+		SetTextures(panoplaces[panoChosen], activeViewMode);
 		activePanoSet = panoChosen;
 	}
 
 
 	//Main Function for changing mode and according textures
 	public void SetTextures(PanoData panoActive, int mode){
-		//print("Setting Textures: "+ panoActive.name);
+		print("Setting Textures: "+ panoActive.name);
 		//Mode 1 = Mono, Mode 2 = Stereo TLM, Mode 3 = Stereo TLM Realistisch
 		if(mode == 1){
 			sphereMonoMat.GetComponent<Renderer>().material.mainTexture = panoActive.texPhoto;
@@ -101,7 +103,6 @@ public class SphereController : MonoBehaviour {
 	}
 
 	public void SetTexturesLoadAsync(PanoData panoActive, int mode){
-		print("loadstart");
 		//print("Setting Textures: "+ panoActive.name);
 		//Mode 1 = Mono, Mode 2 = Stereo TLM, Mode 3 = Stereo TLM Realistisch
 		if(mode == 1){
@@ -131,14 +132,13 @@ public class SphereController : MonoBehaviour {
 	IEnumerator LoadFinished(ResourceRequest left, ResourceRequest right){
 		while (!left.isDone && !right.isDone) {
 			print(left.isDone.ToString() + right.isDone.ToString());
-			yield return new WaitForEndOfFrame();
+			yield return new WaitForSeconds(0.01f);
 		}
 		textureLeft=left.asset as Texture2D;
 		textureRight=right.asset as Texture2D;
 		sphereStereoLMat.GetComponent<Renderer>().material.mainTexture=textureLeft;
 		sphereStereoRMat.GetComponent<Renderer>().material.mainTexture = textureRight;
 		SetStereo(true);
-		print("sucessfully loaded");
 		}
 
 	void SetStereo(bool isStereo){
