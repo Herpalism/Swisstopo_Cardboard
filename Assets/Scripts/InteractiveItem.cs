@@ -19,7 +19,7 @@ public class InteractiveItem : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
 	}
 
-	float GazeActivationTime = 1.5f;
+	float GazeActivationTime = 2.5f;
 
 	void Update () 
 	{
