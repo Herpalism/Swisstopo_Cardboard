@@ -1,5 +1,5 @@
 ﻿
-Shader "Custom/FillRing" {
+Shader "AutoClick/FillRing" {
   Properties {
     _InnerRing ("InnerRing", float) = 1
     _OuterRing ("OuterRing", float) = 2.0

@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class AutocClick : MonoBehaviour,IGvrGazePointer{
+public class AutoClick : MonoBehaviour,IGvrGazePointer{
 
 
 	private Transform Parent;
@@ -25,12 +25,19 @@ public class AutocClick : MonoBehaviour,IGvrGazePointer{
 	public float DelayBeforeClick = 0.1f;
 
 	[Tooltip("How long the rotation of the circle takes. (in Seconds)")]
-	public float RotationDuration = 1f;
+	public float RotationDuration = 1.5f;
 
 	[Tooltip("If the original color should be used.")]
 	public bool UseOriginalColor = true;
-	[Tooltip("The color of the rotating circle if UseOriginalColor is set to false.")]
+	[Tooltip("The color of the initial front circle during rotation if UseOriginalColor is set to false.")]
 	public Color FillColor=Color.white;
+	[Tooltip("The color of the background circle during rotation if UseOriginalColor is set to false.")]
+	public Color BackgroundColor=new Color(1,1,1,0.5f);
+
+	[Tooltip("The alpha value of the background during the rotation, the smaler the value the less visible.")]
+	public float BackgroundAlpha=0.3f;
+
+
 	[Tooltip("The direction in which the circle rotates.")]
 	public RotationDirection RotationDirection= RotationDirection.clockwise;
 	[Tooltip("Where the rotation begins.")]
@@ -64,47 +71,62 @@ public class AutocClick : MonoBehaviour,IGvrGazePointer{
 
 	// Use this for initialization
 	void Start () {
-		this.transform.parent=GameObject.FindObjectOfType<GvrReticle> ().transform;
-		if (RotationDirection == RotationDirection.clockwise) {
-			this.transform.localScale = new Vector3 (1, 1, 1);
+		GvrReticle ParentObject = GameObject.FindObjectOfType<GvrReticle> ();
+		if (ParentObject != null) {
+			this.transform.parent = ParentObject.transform;
+
+		
+			if (RotationDirection == RotationDirection.clockwise) {
+				this.transform.localScale = new Vector3 (1, 1, 1);
+			} else {
+				this.transform.localScale = new Vector3 (-1, 1, 1);
+			}
+			this.transform.localPosition = new Vector3 (0, 0, 0);
+
+			switch (RotationStart) {
+			case RotationStart.top:
+				this.transform.localRotation = Quaternion.identity;
+				break;
+			case RotationStart.left:
+				this.transform.localRotation = Quaternion.Euler (new Vector3 (0, 0, 90));
+				break;
+			case RotationStart.bottom:
+				this.transform.localRotation = Quaternion.Euler (new Vector3 (0, 0, 180));
+				break;
+			case RotationStart.right:
+				this.transform.localRotation = Quaternion.Euler (new Vector3 (0, 0, 270));
+				break;
+			default:
+				break;
+			}
+
+			EventSystem = GameObject.FindObjectOfType<EventSystem> ();
+			Renderer = this.GetComponent<MeshRenderer> ();
+			Renderer.enabled = false;
+			Parent = this.transform.parent;
+			Source = Parent.gameObject.GetComponent<Renderer> ().material;
+			Copy = this.gameObject.GetComponent<Renderer> ().material;
+			OriginalColor = Source.GetColor ("_Color");
+
+			this.gameObject.AddComponent<MeshFilter> ();
+			RingMesh = new Mesh ();
+			GetComponent<MeshFilter> ().mesh = RingMesh;
 		} else {
-			this.transform.localScale = new Vector3 (-1, 1, 1);
+			throw new UnityException ("There is no GvrReticle in the Scene. Please add the GvrReticle prefab to the GvrMain prefab under GvrMain/Head/MainCamera.");
 		}
-		this.transform.localPosition=new Vector3(0,0,0);
-
-		switch (RotationStart) {
-		case RotationStart.top:
-			this.transform.localRotation = Quaternion.identity;
-			break;
-		case RotationStart.left:
-			this.transform.localRotation = Quaternion.Euler(new Vector3(0,0,90));
-			break;
-		case RotationStart.bottom:
-			this.transform.localRotation = Quaternion.Euler(new Vector3(0,0,180));
-			break;
-		case RotationStart.right:
-			this.transform.localRotation = Quaternion.Euler(new Vector3(0,0,270));
-			break;
-		default:
-			break;
-		}
-
-		EventSystem = GameObject.FindObjectOfType<EventSystem> ();
-		Renderer = this.GetComponent<MeshRenderer>();
-		Renderer.enabled = false;
-		Parent = this.transform.parent;
-		Source = Parent.gameObject.GetComponent<Renderer>().material;
-		Copy = this.gameObject.GetComponent<Renderer>().material;
-		OriginalColor = Source.GetColor("_Color");
-
-		this.gameObject.AddComponent<MeshFilter>();
-		RingMesh = new Mesh();
-		GetComponent<MeshFilter>().mesh = RingMesh;
 	}
 
 
 	void OnEnable(){
 		isInitialized = false;
+	}
+
+	void OnDisable(){
+		if (Parent.gameObject.GetComponent<GvrReticle> ().enabled) {
+			GazeInputModule.gazePointer = GazePointer;
+		} else {
+			GazeInputModule.gazePointer = null;
+		}
 	}
 
 	private void Initialize(){
@@ -125,7 +147,7 @@ public class AutocClick : MonoBehaviour,IGvrGazePointer{
 			}
 		}
 		RingMesh.colors = Colors;
-		RingMesh.Optimize();
+		;
 		isInitialized = true;
 	}
 
@@ -133,7 +155,6 @@ public class AutocClick : MonoBehaviour,IGvrGazePointer{
 	private bool hasResetMax = false;
 	private bool hasStayed=false;
 
-	// Update is called once per frame
 	void Update () {
 		if (!isInitialized) {
 			Initialize ();
@@ -154,7 +175,7 @@ public class AutocClick : MonoBehaviour,IGvrGazePointer{
 		lastOuterValue = outerValue;
 
 		if (hasStayed) {
-			theSameFor = theSameFor += Time.deltaTime;
+			theSameFor += Time.deltaTime;
 		} else {
 			theSameFor = 0;
 		}
@@ -252,10 +273,19 @@ public class AutocClick : MonoBehaviour,IGvrGazePointer{
 		PointerEventData pointerData = new PointerEventData (EventSystem);
 		pointerData.button = PointerEventData.InputButton.Left;
 		if (Target!=null) {
-			ExecuteEvents.ExecuteHierarchy (Target, pointerData, ExecuteEvents.pointerClickHandler);
-			//Button targetButton=Target.GetComponentInParent<Button> ();
-			//targetButton.OnPointerClick (pointerData);
+			ExecuteEvents.ExecuteHierarchy (Target, pointerData, ExecuteEvents.pointerDownHandler);
+			StartCoroutine (ClickNow());
 		}		 
+	}
+
+	IEnumerator ClickNow(){
+		yield return new WaitForSecondsRealtime (0.1f);
+		PointerEventData pointerData = new PointerEventData (EventSystem);
+		pointerData.button = PointerEventData.InputButton.Left;
+		if (Target!=null) {
+			ExecuteEvents.ExecuteHierarchy (Target, pointerData, ExecuteEvents.pointerClickHandler);
+			ExecuteEvents.ExecuteHierarchy (Target, pointerData, ExecuteEvents.pointerUpHandler);
+		}	
 	}
 
 
@@ -292,7 +322,11 @@ public class AutocClick : MonoBehaviour,IGvrGazePointer{
 		RingMesh.colors=Colors;
 
 		Renderer.enabled = true;
-		Source.SetColor ("_Color", new Color (OriginalColor.r, OriginalColor.g, OriginalColor.b, 0.5f));
+		if (UseOriginalColor) {
+			Source.SetColor ("_Color", new Color (OriginalColor.r, OriginalColor.g, OriginalColor.b, BackgroundAlpha));
+		} else {
+			Source.SetColor ("_Color", BackgroundColor);
+		}
 	}
 
 
