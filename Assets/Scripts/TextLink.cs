@@ -7,6 +7,11 @@ public class TextLink : MonoBehaviour {
 	public string Link=string.Empty;
 
 	void Start(){
+		if (!GVRSettingsScript.hasCB) {
+			this.GetComponent<Button>().enabled=true;
+		} else {
+			this.GetComponent<Button>().enabled=false;
+		}
 		if (Link==string.Empty) {
 			Text aText= GetComponentInChildren(typeof(Text)) as Text;
 			if (aText!=null) {

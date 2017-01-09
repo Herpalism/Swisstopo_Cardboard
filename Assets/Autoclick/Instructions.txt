@@ -1,0 +1,41 @@
+GazeClick 
+Google VR / Google Cardboard Extension for Timed Reticle
+(c) 2016 Ateo GmbH
+
+GazeClick adds a simple timed click functionality to the Reticle from the GoogleVR Plugin for Unity.
+When the user looks at an interactive object, the timed cursor starts and as soon as the animation is finished, a click is simulated. This enables completely gaze-controlled VR experiences without any additional input.
+
+—————
+
+Instructions:
+
+1) Import GazeClick Unitypackage
+2) Drag the AutoClick Prefab into the scene
+3) Done
+
+—————
+
+FAQ
+
+Q:	Can I change the color of the reticle or animation time?
+A:	Time and color settings are available on the AutoClick script on the AutoClick prefab and can be changed in the editor.
+
+Q: 	I’m getting an error : “The type or namespace name ‘IGvrGazePointer’ was not found.”
+A: 	GoogleVR Plugin is missing. Please import / reimport GoogleVRForUnity.
+
+Q: 	How do I set up GoogleVR with the reticle?
+A: 	Either duplicate the setup from the GoogleVR Demo scene or follow these Instructions from scratch:
+	1) Import GoogleVR for Unity (Link: https://developers.google.com/vr/unity/)
+	2) Create an EventSystem and add the GazeInputModule (GoogleVR / Scripts / GazeInputModule) to it
+	3) Put the GvrViewerMain Prefab (GoogleVR / Prefabs) into the scene
+	3) Drag the GvrReticle Prefab (GoogleVR / Prefabs / UI) onto the Main Camera
+
+Q:	My AutoPlay Reticle doesn’t behave properly, Animation doesn’t always play
+A:	Try changing / adjusting the “Precision” value in the Advanced Options to adjust the sensivity of the AutoPlay Reticle
+
+—————
+
+Thanks you for purchasing this asset!
+
+If you have any questions or need further assistance:
+support@ateo.ch
